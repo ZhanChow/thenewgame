@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scissors Paper Rock Game</title>
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <h1>Scissors Paper Rock Game</h1>
+    <label for="player-choice">Choose your move:</label>
+    <select id="player-choice">
+        <option value="1">Rock</option>
+        <option value="2">Paper</option>
+        <option value="3">Scissors</option>
+    </select>
+    <br><br>
+    <button onclick="play()">Play</button>
+    <br><br>
+    <div id="result"></div>
+    
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+    <script>
+        const contractAddress = '0xd9145CCE52D386f254917e481eB44e9943F39138'; // Replace with the contract address
+        const contractABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "uint8",
+				"name": "choice",
+				"type": "uint8"
+			}
+		],
+		"name": "play",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "choices",
+		"outputs": [
+			{
+				"internalType": "uint8",
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "Yerkezhan",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "Herfriend",
+				"type": "address"
+			}
+		],
+		"name": "evaluate",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+        
+        const web3 = new Web3(Web3.givenProvider);
+        const gameContract = new web3.eth.Contract(contractABI, contractAddress);
+        let playerChoice = 0;
+        
+        async function play() {
+            const accounts = await web3.eth.requestAccounts();
+            const playerAddress = accounts[0];
+            playerChoice = parseInt(document.getElementById('player-choice').value);
+            
+            try {
+                await gameContract.methods.play(playerChoice).send({ from: playerAddress });
+                const opponentChoice = await getOpponentChoice(playerAddress);
+                const result = await evaluateResult(playerAddress, opponentChoice);
+                
+                let resultText = '';
+                if (result === playerAddress) {
+                    resultText = 'You won!';
+                } else if (result === opponentChoice) {
+                    resultText = 'You lost!';
+                } else {
+                    resultText = 'Draw!';
+                }
+                
+                document.getElementById('result').innerHTML = `Opponent chose ${opponentChoice === 1 ? 'Rock' : opponentChoice === 2 ? 'Paper' : 'Scissors'}. ${resultText}`;
+            } catch (error) {
+                console.error(error);
+                document.getElementById('result').innerHTML = 'An error occurred.';
+            }
+        }
+        
+        async function getOpponentChoice(playerAddress) {
+            let opponentChoice = 0;
+            while (opponentChoice === 0) {
+                opponentChoice = await gameContract.methods.choices(playerAddress).call();
+            }
+            return parseInt(opponentChoice);
+        }
+        
+        async function evaluateResult(playerAddress, opponentChoice) {
+            const winner = await gameContract.methods.evaluate(playerAddress, opponentChoice).call();
+            return winner === playerAddress ? playerAddress : winner === 0 ? 0 : opponentChoice;
+        }
+    </script>
+</body>
+</html>
