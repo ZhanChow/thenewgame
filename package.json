@@ -1,0 +1,15 @@
+{
+  "name": "scissors-paper-rock-game",
+  "version": "1.0.0",
+  "description": "A simple game of scissors, paper, rock using Ethereum smart contract.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/scissors-paper-rock-game.git"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}
